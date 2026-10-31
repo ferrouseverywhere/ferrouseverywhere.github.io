@@ -4,276 +4,484 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ferrous Everywhere</title>
+
+  <!-- Pixel font style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- model-viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
   <style>
     :root {
-      --bg: #0f1115;
-      --bg2: #171b22;
-      --card: #1c212b;
-      --card2: #242b37;
-      --text: #f2f2f2;
-      --muted: #b5bcc8;
-      --accent: #d8a54a;
-      --accent2: #8d6330;
-      --border: rgba(255, 255, 255, 0.08);
-      --shadow: rgba(0, 0, 0, 0.45);
+      --bg: #1b1b1b;
+      --panel: rgba(0, 0, 0, 0.35);
+      --text: #ffffff;
+      --text-muted: #d0d0d0;
+      --shadow: #000000;
+      --mc-yellow: #ffff55;
+      --mc-button-text: #ffffff;
+      --mc-button-hover-text: #ffffa0;
+      --content-width: 1240px;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
     body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Press Start 2P", monospace;
       color: var(--text);
-      background:
-        radial-gradient(circle at top, rgba(216, 165, 74, 0.08), transparent 30%),
-        linear-gradient(180deg, #11141a 0%, #0d0f13 100%);
+      background-color: #262626;
+      background-image: url("assets/textures/stone_bricks.png");
+      background-repeat: repeat;
+      background-size: 96px 96px;
+      overflow-x: hidden;
+    }
+
+    .page {
+      position: relative;
       min-height: 100vh;
+      isolation: isolate;
     }
 
-    header {
-      padding: 64px 20px 40px;
-      text-align: center;
+    /* Overlay suave para que el fondo no moleste */
+    .page::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.38);
+      z-index: -2;
+      pointer-events: none;
     }
 
-    h1 {
+    /* PANEL 3D DERECHO */
+    .ferrous-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(44vw, 720px);
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ferrous-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          to left,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(0, 0, 0, 0.10) 52%,
+          rgba(0, 0, 0, 0.55) 76%,
+          rgba(0, 0, 0, 0.92) 100%
+        );
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .ferrous-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(12px 12px 0 rgba(0, 0, 0, 0.95));
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 92%;
+      --poster-color: transparent;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      width: min(var(--content-width), calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+    }
+
+    .hero {
+      padding-top: 18px;
+      margin-bottom: 36px;
+      max-width: 760px;
+    }
+
+    .title {
       margin: 0;
-      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.2;
+      font-size: clamp(1.35rem, 2vw + 0.7rem, 2.7rem);
+      text-transform: uppercase;
       letter-spacing: 1px;
-      color: #fff;
+      color: #ffffff;
+      text-shadow:
+        4px 4px 0 #000000;
+    }
+
+    .helmet-o {
+      width: 1.05em;
+      height: 1.05em;
+      object-fit: contain;
+      vertical-align: -0.16em;
+      margin: 0 0.05em;
+      filter:
+        brightness(0)
+        invert(1)
+        drop-shadow(4px 4px 0 #000000);
+      image-rendering: pixelated;
     }
 
     .subtitle {
-      max-width: 850px;
-      margin: 18px auto 0;
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.7;
+      margin-top: 18px;
+      max-width: 700px;
+      line-height: 1.85;
+      font-size: 0.66rem;
+      color: #ffffff;
+      text-shadow: 3px 3px 0 #000000;
     }
 
-    .highlight {
-      color: var(--accent);
-      font-weight: bold;
+    .games-section {
+      margin-top: 32px;
+      max-width: 760px;
     }
 
-    main {
-      width: min(1200px, calc(100% - 32px));
-      margin: 0 auto 60px;
-    }
-
-    .section-title {
-      margin: 20px 0 18px;
-      font-size: 1.6rem;
-      color: var(--accent);
-      text-align: center;
+    .section-heading {
+      margin: 0 0 22px;
+      font-size: 0.9rem;
+      color: var(--mc-yellow);
+      text-transform: uppercase;
+      text-shadow: 3px 3px 0 #000000;
     }
 
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 22px;
+      grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+      gap: 18px;
+    }
+
+    /* TARJETA / BOTÓN MINECRAFT */
+    .game-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transform-origin: center;
+      transition: transform 0.10s steps(2, end);
+      filter: drop-shadow(6px 6px 0 #000000);
+    }
+
+    .game-link:hover {
+      transform: scale(1.05);
     }
 
     .game-card {
-      text-decoration: none;
-      color: inherit;
-      background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 22px 16px;
+      min-height: 176px;
+      padding: 14px 12px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 205px;
-      box-shadow: 0 10px 24px var(--shadow);
-      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      justify-content: flex-start;
+      gap: 12px;
       position: relative;
-      overflow: hidden;
+      image-rendering: pixelated;
+
+      background-color: #7d7d7d;
+      background-image: url("assets/textures/mc_button.png");
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+
+      transition: background-image 0.10s steps(2, end);
     }
 
-    .game-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top, rgba(216, 165, 74, 0.12), transparent 55%);
-      opacity: 0;
-      transition: opacity 0.22s ease;
+    .game-link:hover .game-card {
+      background-image: url("assets/textures/mc_button_hover.png");
     }
 
-    .game-card:hover {
-      transform: scale(1.06);
-      border-color: rgba(216, 165, 74, 0.5);
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
-    }
-
-    .game-card:hover::before {
-      opacity: 1;
+    .game-icon-box {
+      width: 72px;
+      height: 72px;
+      border: 4px solid #000000;
+      background: #3c3c3c;
+      display: grid;
+      place-items: center;
+      image-rendering: pixelated;
+      box-shadow: inset -4px -4px 0 rgba(0,0,0,0.35);
     }
 
     .game-icon {
-      width: 82px;
-      height: 82px;
-      border-radius: 22px;
-      display: grid;
-      place-items: center;
-      font-size: 2.2rem;
-      margin-bottom: 16px;
-      background: linear-gradient(135deg, #2e3543, #1a1f27);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
-      position: relative;
-      z-index: 1;
+      font-size: 2rem;
+      line-height: 1;
+      filter: drop-shadow(2px 2px 0 #000000);
     }
 
     .game-name {
-      font-weight: 700;
       text-align: center;
-      font-size: 1rem;
-      line-height: 1.35;
-      position: relative;
-      z-index: 1;
+      font-size: 0.58rem;
+      line-height: 1.45;
+      color: var(--mc-button-text);
+      text-shadow: 2px 2px 0 #000000;
+      min-height: 2.8em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-link:hover .game-name {
+      color: var(--mc-button-hover-text);
     }
 
     .game-status {
-      margin-top: 8px;
-      font-size: 0.85rem;
-      color: var(--muted);
       text-align: center;
-      position: relative;
-      z-index: 1;
+      font-size: 0.48rem;
+      line-height: 1.5;
+      color: #eaeaea;
+      text-shadow: 2px 2px 0 #000000;
+      opacity: 0.95;
     }
 
-    .legend {
-      margin: 34px auto 0;
-      max-width: 900px;
-      text-align: center;
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 0.97rem;
+    .footer-note {
+      margin-top: 28px;
+      max-width: 760px;
+      font-size: 0.52rem;
+      line-height: 1.8;
+      color: #ededed;
+      text-shadow: 2px 2px 0 #000000;
     }
 
-    .tag {
-      display: inline-block;
-      background: rgba(216, 165, 74, 0.12);
-      border: 1px solid rgba(216, 165, 74, 0.25);
-      color: #f1c77c;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 0.85rem;
-      margin-top: 10px;
-    }
-
-    footer {
-      text-align: center;
-      color: #8c93a1;
-      padding: 32px 20px 44px;
-      font-size: 0.95rem;
-    }
-
-    @media (max-width: 600px) {
-      header {
-        padding-top: 48px;
+    @media (max-width: 980px) {
+      .ferrous-panel {
+        width: 50vw;
+        opacity: 0.75;
       }
 
-      .game-card {
-        min-height: 185px;
+      .content {
+        width: min(calc(100% - 24px), 900px);
       }
 
-      .game-icon {
-        width: 72px;
-        height: 72px;
-        font-size: 2rem;
+      .hero,
+      .games-section,
+      .footer-note {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .ferrous-panel {
+        opacity: 0.22;
+        width: 100vw;
+      }
+
+      .ferrous-panel::before {
+        background: rgba(0, 0, 0, 0.68);
+      }
+
+      .content {
+        padding-top: 26px;
+      }
+
+      .games-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .subtitle {
+        font-size: 0.58rem;
+        line-height: 1.9;
+      }
+
+      .section-heading {
+        font-size: 0.76rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .games-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .title {
+        font-size: 1.18rem;
       }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Ferrous Everywhere</h1>
-    <p class="subtitle">
-      Bringing the <span class="highlight">Ferrous Wroughtnaut</span> from
-      <span class="highlight">Mowzie's Mobs</span> into as many games as possible,
-      while faithfully preserving its original behavior.
-    </p>
-    <div class="tag">Official project page</div>
-  </header>
+  <div class="page">
+    <!-- PANEL 3D -->
+    <aside class="ferrous-panel" aria-hidden="true">
+      <div class="ferrous-wrap">
+        <model-viewer
+          id="ferrousModel"
+          src="assets/models/ferrous.glb"
+          alt="Ferrous Wroughtnaut 3D"
+          camera-controls
+          disable-pan
+          disable-zoom
+          auto-rotate
+          rotation-per-second="22deg"
+          shadow-intensity="0"
+          exposure="1"
+          interaction-prompt="none"
+          camera-orbit="35deg 78deg 5.8m"
+          field-of-view="26deg"
+          animation-name="idle_active"
+          animation-crossfade-duration="300"
+          autoplay>
+        </model-viewer>
+      </div>
+    </aside>
 
-  <main>
-    <h2 class="section-title">Games</h2>
+    <main class="content">
+      <section class="hero">
+        <h1 class="title">
+          FERR<img class="helmet-o" src="assets/textures/wrought_helmet_icon.png" alt="">US EVERYWHERE
+        </h1>
 
-    <section class="games-grid">
-      <a class="game-card" href="#">
-        <div class="game-icon">⚔️</div>
-        <div class="game-name">TABS</div>
-        <div class="game-status">Available / In development</div>
-      </a>
+        <p class="subtitle">
+          Bringing the Ferrous Wroughtnaut from Mowzie's Mobs into as many games as possible,
+          while faithfully preserving its original behavior, animations, sound design, and combat identity.
+        </p>
+      </section>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🐌</div>
-        <div class="game-name">Slime Rancher</div>
-        <div class="game-status">Planned</div>
-      </a>
+      <section class="games-section">
+        <h2 class="section-heading">Games</h2>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🧪</div>
-        <div class="game-name">Slime Rancher 2</div>
-        <div class="game-status">Planned</div>
-      </a>
+        <div class="games-grid">
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">⚔️</div></div>
+              <div class="game-name">TABS</div>
+              <div class="game-status">Available / In development</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🔥</div>
-        <div class="game-name">Rivals of Aether</div>
-        <div class="game-status">Planned</div>
-      </a>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🐌</div></div>
+              <div class="game-name">Slime Rancher</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🌩️</div>
-        <div class="game-name">Rivals of Aether 2</div>
-        <div class="game-status">Planned</div>
-      </a>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🧪</div></div>
+              <div class="game-name">Slime Rancher 2</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🦖</div>
-        <div class="game-name">Jurassic World Evolution 2</div>
-        <div class="game-status">Planned</div>
-      </a>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🔥</div></div>
+              <div class="game-name">Rivals of Aether</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🦕</div>
-        <div class="game-name">Jurassic World Evolution 3</div>
-        <div class="game-status">Possible future port</div>
-      </a>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🌩️</div></div>
+              <div class="game-name">Rivals of Aether 2</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🧟</div>
-        <div class="game-name">Project Zomboid</div>
-        <div class="game-status">Planned</div>
-      </a>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🦖</div></div>
+              <div class="game-name">Jurassic World Evolution 2</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🦁</div>
-        <div class="game-name">Planet Zoo</div>
-        <div class="game-status">Planned</div>
-      </a>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🦕</div></div>
+              <div class="game-name">Jurassic World Evolution 3</div>
+              <div class="game-status">Possible future port</div>
+            </div>
+          </a>
 
-      <a class="game-card" href="#">
-        <div class="game-icon">🐘</div>
-        <div class="game-name">Planet Zoo 2</div>
-        <div class="game-status">Possible future port</div>
-      </a>
-    </section>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🧟</div></div>
+              <div class="game-name">Project Zomboid</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-    <p class="legend">
-      Click any game card to open its page, downloads, screenshots, and development status.
-      For now, the links are placeholders using <strong>#</strong>.
-      Later you can replace them with real links to each repository or release page.
-    </p>
-  </main>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🦁</div></div>
+              <div class="game-name">Planet Zoo</div>
+              <div class="game-status">Planned</div>
+            </div>
+          </a>
 
-  <footer>
-    © 2026 Ferrous Everywhere — Fan project inspired by Mowzie's Mobs.
-  </footer>
+          <a class="game-link" href="#">
+            <div class="game-card">
+              <div class="game-icon-box"><div class="game-icon">🐘</div></div>
+              <div class="game-name">Planet Zoo 2</div>
+              <div class="game-status">Possible future port</div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <p class="footer-note">
+        Replace each <strong>#</strong> with the future page or release link for each game.
+      </p>
+    </main>
+  </div>
+
+  <script>
+    const ferrousModel = document.getElementById("ferrousModel");
+
+    // Animaciones reales que sí existen en tu GLB actual
+    const animationPool = [
+      "idle_active",
+      "attack",
+      "attack_variant_2",
+      "idle_dormant",
+      "vertical_attack"
+    ];
+
+    const randomAnimation =
+      animationPool[Math.floor(Math.random() * animationPool.length)];
+
+    ferrousModel.setAttribute("animation-name", randomAnimation);
+
+    // Ajustes de cámara según animación para que se vea mejor
+    const cameraByAnimation = {
+      idle_active: "30deg 78deg 5.8m",
+      attack: "40deg 76deg 6.0m",
+      attack_variant_2: "40deg 76deg 6.0m",
+      idle_dormant: "25deg 78deg 5.6m",
+      vertical_attack: "36deg 74deg 6.1m"
+    };
+
+    if (cameraByAnimation[randomAnimation]) {
+      ferrousModel.setAttribute("camera-orbit", cameraByAnimation[randomAnimation]);
+    }
+
+    // Si luego agregas walk real al GLB, solo lo sumas aquí:
+    // animationPool.push("walk");
+  </script>
 </body>
 </html>
