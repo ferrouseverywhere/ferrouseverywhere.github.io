@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ferrous Everywhere</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --bg2: #171b22;
+      --card: #1c212b;
+      --card2: #242b37;
+      --text: #f2f2f2;
+      --muted: #b5bcc8;
+      --accent: #d8a54a;
+      --accent2: #8d6330;
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(216, 165, 74, 0.08), transparent 30%),
+        linear-gradient(180deg, #11141a 0%, #0d0f13 100%);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 64px 20px 40px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .highlight {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    main {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto 60px;
+    }
+
+    .section-title {
+      margin: 20px 0 18px;
+      font-size: 1.6rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 22px;
+    }
+
+    .game-card {
+      text-decoration: none;
+      color: inherit;
+      background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 205px;
+      box-shadow: 0 10px 24px var(--shadow);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(216, 165, 74, 0.12), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.22s ease;
+    }
+
+    .game-card:hover {
+      transform: scale(1.06);
+      border-color: rgba(216, 165, 74, 0.5);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    .game-icon {
+      width: 82px;
+      height: 82px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 2.2rem;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #2e3543, #1a1f27);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-name {
+      font-weight: 700;
+      text-align: center;
+      font-size: 1rem;
+      line-height: 1.35;
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-status {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .legend {
+      margin: 34px auto 0;
+      max-width: 900px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.97rem;
+    }
+
+    .tag {
+      display: inline-block;
+      background: rgba(216, 165, 74, 0.12);
+      border: 1px solid rgba(216, 165, 74, 0.25);
+      color: #f1c77c;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      color: #8c93a1;
+      padding: 32px 20px 44px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding-top: 48px;
+      }
+
+      .game-card {
+        min-height: 185px;
+      }
+
+      .game-icon {
+        width: 72px;
+        height: 72px;
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ferrous Everywhere</h1>
+    <p class="subtitle">
+      Bringing the <span class="highlight">Ferrous Wroughtnaut</span> from
+      <span class="highlight">Mowzie's Mobs</span> into as many games as possible,
+      while faithfully preserving its original behavior.
+    </p>
+    <div class="tag">Official project page</div>
+  </header>
+
+  <main>
+    <h2 class="section-title">Games</h2>
+
+    <section class="games-grid">
+      <a class="game-card" href="#">
+        <div class="game-icon">⚔️</div>
+        <div class="game-name">TABS</div>
+        <div class="game-status">Available / In development</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🐌</div>
+        <div class="game-name">Slime Rancher</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🧪</div>
+        <div class="game-name">Slime Rancher 2</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🔥</div>
+        <div class="game-name">Rivals of Aether</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🌩️</div>
+        <div class="game-name">Rivals of Aether 2</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🦖</div>
+        <div class="game-name">Jurassic World Evolution 2</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🦕</div>
+        <div class="game-name">Jurassic World Evolution 3</div>
+        <div class="game-status">Possible future port</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🧟</div>
+        <div class="game-name">Project Zomboid</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🦁</div>
+        <div class="game-name">Planet Zoo</div>
+        <div class="game-status">Planned</div>
+      </a>
+
+      <a class="game-card" href="#">
+        <div class="game-icon">🐘</div>
+        <div class="game-name">Planet Zoo 2</div>
+        <div class="game-status">Possible future port</div>
+      </a>
+    </section>
+
+    <p class="legend">
+      Click any game card to open its page, downloads, screenshots, and development status.
+      For now, the links are placeholders using <strong>#</strong>.
+      Later you can replace them with real links to each repository or release page.
+    </p>
+  </main>
+
+  <footer>
+    © 2026 Ferrous Everywhere — Fan project inspired by Mowzie's Mobs.
+  </footer>
+</body>
+</html>
