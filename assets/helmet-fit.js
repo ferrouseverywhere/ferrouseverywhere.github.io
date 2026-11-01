@@ -39,7 +39,7 @@
     const glyphBaselineOffset=glyphBaseline.getBoundingClientRect().top-glyph.getBoundingClientRect().top;
     const targetTop=baselineY-glyphBaselineOffset;
     glyph.style.left=targetLeft.toFixed(3)+'px';
-    glyph.style.top=targetTop.toFixed(3)+'px';
+    glyph.style.top=(targetTop-3).toFixed(3)+'px'; // Move helmet 3 CSS pixels up.
   }
   let lock=false;
   const safeAlign=()=>{if(lock)return;lock=true;requestAnimationFrame(()=>{lock=false;align()})};

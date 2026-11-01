@@ -10,7 +10,7 @@ const soundToggle = document.getElementById('sound-toggle');
 const TICK_RATE = 20;
 const durations = {idle: 5.8, walk: 5, swingLeft: 2.5, swingRight: 2.5,
   vertical: 105 / TICK_RATE, hurt: 15 / TICK_RATE};
-const clipNames = {idle:'idle_active',walk:'idle_active',swingLeft:'attack',
+const clipNames = {idle:'idle_active',walk:'ferrous_walk_web',swingLeft:'attack',
   swingRight:'attack_variant_2',vertical:'vertical_attack',hurt:'hurt'};
 const choices = ['idle','walk','swingLeft','swingRight','vertical'];
 const soundEvents = {
@@ -97,7 +97,7 @@ const tempQ = new THREE.Quaternion();
 let model, mixer, clips, motion, bones={}, gaitData={}, originalTransforms=[];
 let activeClipNames=[];
 let state='idle', elapsed=0, previousTick=0, lastChoice='', animationAction=null;
-let walkTick=0, walkStepTimer=0, ambientTimer=7.5;
+let walkStepTimer=0, ambientTimer=7.5;
 let hitFlash=0, modelReady=false;
 const originalMaterials=new Set();
 let modelsToHit=[];
@@ -159,7 +159,7 @@ function useState(next) {
   animationAction.reset();
   animationAction.enabled=true;
   animationAction.setEffectiveWeight(1);
-  animationAction.setLoop(next==='idle'||next==='walk'?THREE.LoopRepeat:THREE.LoopOnce,1);
+  animationAction.setLoop(next==='walk'?THREE.LoopRepeat:THREE.LoopOnce, next==='walk'?Infinity:1);
   animationAction.clampWhenFinished=true;
   animationAction.play();
   // Important: synchronously evaluate frame zero before the next draw.
@@ -185,16 +185,23 @@ function initialModel() {
 }
 
 function sourceEulerQuaternion(source) {
-  // Same Z*Y*X Euler convention as GlbRuntime.Gait.cs, expressed in GLB coordinates.
+  // Reference: GlbRuntime.Gait.cs, SourceEulerToUnity, converted to glTF axes.
   const qZ=new THREE.Quaternion().setFromAxisAngle(axis.Z,-source[2]);
   const qY=new THREE.Quaternion().setFromAxisAngle(axis.Y,+source[1]);
   const qX=new THREE.Quaternion().setFromAxisAngle(axis.X,-source[0]);
   return qZ.multiply(qY).multiply(qX);
 }
-function applyWalk(tick) {
-  const speed=Math.PI*.05, degree=.8, blend=10;
+
+/* Bake the exact TABS procedural walk into its OWN full-pose AnimationClip.
+   GLB idle_active is only 0.05 seconds (a static pose), not a walking clip.
+   Previously the website overlaid Euler offsets after mixer.update(), letting
+   the mixer and gait compete for the same joints and producing broken frames.
+   This sampled 40-tick (2 second) cycle stays within the mixer and loops
+   seamlessly; no per-frame quaternion mutation or competing animation layers.
+   Reference: TABS RC2 GlbRuntime.Animation.cs::OverlayWalk. */
+function sourceWalkPose(tick) {
+  const speed=Math.PI*.05, degree=.8, weight=1;
   const swingFrame=(4*Math.PI*tick-30*Math.sin(.1*Math.PI*(tick-9))-27*Math.PI)/(4*Math.PI)+5;
-  const weight=Math.pow(Math.sin(blend*Math.PI*.05),2);
   const d={};
   function add(name,index,val){if(!d[name])d[name]=[0,0,0];d[name][index]+=val;}
   function cyc(sp,off){return Math.cos(sp*swingFrame+off);}
@@ -225,19 +232,53 @@ function applyWalk(tick) {
   walk('lowerArmLeftJoint',2*speed,.1,true,-.5,0);
   walk('handLeft',2*speed,.2,false,-.5,.6);
   add('lowerArmLeftJoint',1,-.65*weight);
-  const waist=bones.waist;
-  if(waist){
-    const bob=(Math.sin(2*speed*swingFrame)*2*weight-2*weight)/16;
-    waist.position.y-=bob;
-    waist.position.z-=3*weight*Math.pow(Math.sin(speed*(tick-13)),2)/16;
+  // The waist bob is in model units (16 model pixels per block).
+  const bob=(Math.sin(2*speed*swingFrame)*2*weight-2*weight)/16;
+  const z=-3*weight*Math.pow(Math.sin(speed*(tick-13)),2)/16;
+  return {delta:d, waistY:-bob, waistZ:z};
+}
+function buildWalkClip(idlePose) {
+  const cycleTicks=40;
+  const seconds=cycleTicks/TICK_RATE;
+  const ticks=Array.from({length:cycleTicks+1},(_,k)=>k);
+  const times=ticks.map(k=>k/TICK_RATE);
+  const poses=ticks.map(sourceWalkPose);
+  // Precompute active Euler inverse per bone once, not per animation frame.
+  const activeInv={};
+  for(const [name,ref] of Object.entries(gaitData)) {
+    activeInv[name]=sourceEulerQuaternion(ref.active).invert();
   }
-  for(const [name,delta] of Object.entries(d)){
-    const b=bones[name], ref=gaitData[name];if(!b||!ref)continue;
-    const e=ref.active.map((v,i)=>v+delta[i]);
-    const orig=sourceEulerQuaternion(ref.active);
-    const wanted=sourceEulerQuaternion(e);
-    b.quaternion.premultiply(wanted.multiply(orig.invert()));
+  const newTracks=[];
+  for(const track of idlePose.tracks) {
+    const found=track.name.match(/^(.+)\.(position|quaternion|scale)$/);
+    if(!found) {newTracks.push(track.clone());continue;}
+    const [_,name,property]=found;
+    const isGaitRotation=property==='quaternion' && gaitData[name];
+    const isWaistTranslation=name==='waist' && property==='position';
+    const staticSample=Array.from(track.createInterpolant().evaluate(idlePose.duration));
+    if(!isGaitRotation && !isWaistTranslation) {
+      // All other channels remain owned by the walk clip: never T-pose gaps.
+      newTracks.push(new track.constructor(track.name,[0,seconds],[...staticSample,...staticSample]));
+      continue;
+    }
+    const values=[];
+    for(const pose of poses) {
+      if(isGaitRotation) {
+        const delta=pose.delta[name]||[0,0,0];
+        const reference=gaitData[name];
+        const euler=reference.active.map((v,i)=>v+delta[i]);
+        const q=sourceEulerQuaternion(euler)
+          .multiply(activeInv[name]).multiply(new THREE.Quaternion().fromArray(staticSample)).normalize();
+        values.push(q.x,q.y,q.z,q.w);
+      } else {
+        values.push(staticSample[0],staticSample[1]+pose.waistY,staticSample[2]+pose.waistZ);
+      }
+    }
+    newTracks.push(new track.constructor(track.name,times,values));
   }
+  const clip=new THREE.AnimationClip('ferrous_walk_web',seconds,newTracks);
+  clip.validate();
+  return clip;
 }
 function applyExtras(frame) {
   // Java procedural controller: neck motion during the vulnerable vertical attack.
@@ -274,8 +315,7 @@ function animate() {
     const nowTick=Math.floor(elapsed*TICK_RATE);
     emitTimelineSounds(nowTick);
     if(state==='walk'){
-      walkTick+=dt*TICK_RATE;
-      applyWalk(walkTick);
+      // Full-body gait is already in the walk action. Only footsteps run here.
       walkStepTimer+=dt;
       if(walkStepTimer>=1){walkStepTimer-=1;playSound('step'+(1+Math.floor(Math.random()*3)),.5,.5);}
     }
@@ -310,7 +350,7 @@ mount.addEventListener('pointerdown',event=>{
     playSound('hurt1',1,1);
     previousTick=1; // This click already played the tick-1 hurt sound.
   }else{
-    playSound('anvil_land',1,.5);
+    playSound('anvil_land',.4,2); // TABS RC2 BlockedHit: armour clang, pitch 2x.
   }
 });
 
@@ -372,7 +412,7 @@ function upgradeSwordToRC2(sword) {
 }
 
 Promise.all([
-  new GLTFLoader().loadAsync('assets/models/ferrous_web.glb?v=2'),
+  new GLTFLoader().loadAsync('assets/models/ferrous_web.glb?v=5'),
   fetch('assets/data/ferrous_walk_euler.json?v=3').then(r=>{if(!r.ok)throw Error('Walk JSON missing');return r.json();}),
   fetch('assets/data/ferrous_neutral_pose.json?v=3').then(r=>{if(!r.ok)throw Error('Active pose missing');return r.json();})
 ]).then(([gltf,walk,neutral])=>{
@@ -414,10 +454,15 @@ Promise.all([
   const box=new THREE.Box3().setFromObject(model);
   const center=box.getCenter(new THREE.Vector3());
   const size=box.getSize(new THREE.Vector3());
+  // The geometry AABB is pulled sideways by the sword. Spin around the
+  // anatomical rootBox axis instead of that moving visual bounding center.
+  // Keep the vertical centering from the AABB so the full body stays visible.
+  const bodyAxis=new THREE.Vector3();
+  if(bones.rootBox) bones.rootBox.getWorldPosition(bodyAxis);
   // Normalize from measured GLB bounds; keep head and feet in view.
   const norm=Math.min(1,3.0/Math.max(size.y,0.001));
   model.scale.multiplyScalar(norm);
-  model.position.set(-center.x*norm,-center.y*norm,-center.z*norm);
+  model.position.set(-bodyAxis.x*norm,-center.y*norm,-bodyAxis.z*norm);
   // The centered size is the permanent base pose, including after each mixer tick.
   const rootPose=originalTransforms.find(entry=>entry.node===model);
   if(rootPose){rootPose.position.copy(model.position);rootPose.scale.copy(model.scale);}
@@ -425,6 +470,7 @@ Promise.all([
   // Compile the full pose clips AFTER the 18 Java constructor rest corrections
   // and root normalisation, but BEFORE any action starts playing.
   clips=fillClipPose(gltf.animations);
+  clips.ferrous_walk_web=buildWalkClip(clips.idle_active);
   mixer=new THREE.AnimationMixer(model);
   initialModel();
 }).catch(error=>{
