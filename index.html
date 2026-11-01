@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#343434">
+  <meta name="description" content="Ferrous Everywhere — an unofficial fan project bringing the Ferrous Wroughtnaut to other games.">
+  <title>Ferrous Everywhere</title>
+  <link rel="icon" type="image/png" href="assets/textures/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site.css?v=4">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}
+  </script>
+  <script type="module" src="assets/ferrous-viewer.js?v=4"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="stone-dim" aria-hidden="true"></div>
+    <aside class="ferrous-panel" aria-label="Interactive Ferrous Wroughtnaut preview">
+      <div class="ferrous-stage" id="ferrous-stage">
+        <div id="ferrous-loading" class="ferrous-loading">SUMMONING FERROUS...</div>
+        <div id="ferrous-fallback" class="ferrous-fallback" hidden>3D PREVIEW UNAVAILABLE</div>
+      </div>
+      <div class="ferrous-caption" id="ferrous-caption">FERROUS WROUGHTNAUT</div>
+    </aside>
+    <main class="content">
+      <header class="hero">
+        <h1 class="site-title" aria-label="Ferrous Everywhere">
+          FERR<span class="helmet-slot" aria-hidden="true"><span class="helmet-reference">O</span><span class="helmet-glyph"><span class="helmet-character">&#xE000;</span><span class="helmet-glyph-baseline"></span></span><span class="helmet-baseline"></span></span>US
+          <span class="title-second">EVERYWHERE</span>
+        </h1>
+        <p class="subtitle">The <strong>Ferrous Wroughtnaut</strong> from Mowzie's Mobs, crossing into other games while retaining its original identity, movements and combat mechanics.</p>
+        <div class="hero-actions">
+          <button type="button" class="sound-toggle" id="sound-toggle" aria-pressed="false">SOUND: OFF</button>
+        </div>
+      </header>
+      <section class="games-section" aria-labelledby="games-heading">
+        <h2 id="games-heading" class="section-title">GAMES</h2>
+        <div class="games-grid">
+          <a class="game-link" href="https://github.com/ferrouseverywhere" target="_blank" rel="noopener noreferrer"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">⚔️</span><span class="game-name">TABS</span><span class="game-status">RELEASE CANDIDATE</span></a>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🐌</span><span class="game-name">SLIME RANCHER</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🧪</span><span class="game-name">SLIME RANCHER 2</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🔥</span><span class="game-name">RIVALS OF AETHER</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🌩️</span><span class="game-name">RIVALS OF AETHER 2</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🦖</span><span class="game-name">JURASSIC WORLD EVOLUTION 2</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🦕</span><span class="game-name">JURASSIC WORLD EVOLUTION 3</span><span class="game-status">FUTURE PORT</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🧟</span><span class="game-name">PROJECT ZOMBOID</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🦁</span><span class="game-name">PLANET ZOO</span><span class="game-status">PLANNED</span></div>
+          <div class="game-link future"><canvas class="mc-button-skin" aria-hidden="true"></canvas><span class="game-icon" aria-hidden="true">🐘</span><span class="game-name">PLANET ZOO 2</span><span class="game-status">FUTURE PORT</span></div>
+        </div>
+      </section>
+      <footer>UNOFFICIAL FAN-MADE PROJECT · FERROUS WROUGHTNAUT AND ORIGINAL ASSETS BY <a href="https://www.curseforge.com/minecraft/mc-mods/mowzies-mobs" target="_blank" rel="noopener noreferrer">MOWZIE'S MOBS</a>.<span class="footer-subline">Not affiliated with Mojang, Landfall or the developers of the listed games.</span></footer>
+    </main>
+  </div>
+  <script src="assets/minecraft-buttons.js?v=4" defer></script>
+  <script src="assets/helmet-fit.js?v=4" defer></script>
+</body>
+</html>
